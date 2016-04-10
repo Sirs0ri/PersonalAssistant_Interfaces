@@ -5,7 +5,19 @@ started start"""
 import logging
 import time
 import simple_cli as the_interface
+
+# ==== If not interested in AR, remove the code from there (Part 1/2) =====
 import variables_private
+# The file variables_private.py is in my .gitignore - for good reasons.
+# It includes private API-Keys that I don't want online. However, if you want
+# to be able to send AutoRemote-Messages (see: http://joaoapps.com/autoremote/
+# for certain log entries, create that file and add an entry called 'ar_key'
+# for your private AutoRemote key (eg. "ar_key = 'YOUR_KEY_HERE'").
+#
+# If you're not interested in that, you can remove the import, the whole class
+# 'AutoRemoteHandler', as well as the few lines configuring the Handler above
+# the line 'root.addHandler(autoremote_handler)' from the code below. The parts
+# you can remove are marked - be careful and you can't do anything wrong.
 
 
 class AutoRemoteHandler(logging.Handler):
@@ -19,6 +31,7 @@ class AutoRemoteHandler(logging.Handler):
         payload = {'key': variables_private.ar_key, 'message': message}
         requests.post("https://autoremotejoaomgcd.appspot.com/sendmessage",
                       payload)
+# === To here (End of Part 1/2) ===
 
 
 class ColorStreamHandler(logging.StreamHandler):
@@ -89,22 +102,28 @@ def configure_logging():
         "%(asctime)s %(levelname)s %(name)s %(message)s",
         time.strftime("%X"))
 
-    # create and add handlers
+    # create and add a handler to store the log in a textfile.
     file_handler = logging.FileHandler("interface.log")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(full_formatter)
     root.addHandler(file_handler)
 
+    # create a handler that logs to the current commandline - not enabled now,
+    # but it might be useful later for debugging.
     console_handler = ColorStreamHandler()
     console_handler.setLevel(logging.DEBUG)
     console_handler.setFormatter(nice_formatter)
     # turned off for now, since I don't want the logging in my console.
     # root.addHandler(console_handler)
 
+    # === If not interested in AR, remove the code from there (Part 2/2) ====
+    # create ans add a handler that sends errors to my phone via AutoRemote.
     autoremote_handler = AutoRemoteHandler()
+    # Set the Handler to forward only important messages - Warnings or higher
     autoremote_handler.setLevel(logging.WARN)
     autoremote_handler.setFormatter(practical_formatter)
     root.addHandler(autoremote_handler)
+    # === To here (End of Part 1/2) ===
 
 # import os.path
 
