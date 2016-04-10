@@ -112,7 +112,7 @@ class CommandLineInterface(cmd.Cmd):
         print("The Connection to 'http://{url}:{port}/status' failed."
               .format(**self.connection))
         logger.debug("Requiring userinput whether to try starting the server "
-                    "manually.")
+                     "manually.")
         var = raw_input("Try to start the server remotely? (y/n) \n>>> ")
         logger.debug("Userinput was '%s'.", var)
         while var not in ["y", "n"]:
@@ -122,7 +122,7 @@ class CommandLineInterface(cmd.Cmd):
             # TODO Start the server remotely
         elif var == "n":
             logger.debug("Requiring userinput whether to change the server's "
-                        "address.")
+                         "address.")
             var = raw_input("Enter a new host? (y/n) \n>>> ")
             logger.debug("Userinput was '%s'.", var)
             while var not in ["y", "n"]:
