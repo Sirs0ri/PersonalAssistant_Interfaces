@@ -61,12 +61,12 @@ class CommandLineInterface(cmd.Cmd):
     def postcmd(self, stop, line):
         return cmd.Cmd.postcmd(self, stop, line)
 
-    def do_exit(self, line):
-        "Exit the interface"
-        return True
-
     def do_EOF(self, line):
-        "Exit the interface"
+        """Exit the interface"""
+        return self.do_exit(line)
+
+    def do_exit(self, line):
+        """Exit the interface"""
         return True
 
     def connect(self):
