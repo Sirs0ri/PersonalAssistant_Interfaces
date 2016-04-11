@@ -3,6 +3,7 @@ from the root folder. After importing it, the interface will be
 started start"""
 
 import logging
+import logging.handlers
 import time
 import simple_cli as the_interface
 
@@ -108,7 +109,8 @@ def configure_logging():
         time.strftime("%X"))
 
     # create and add a handler to store the log in a textfile.
-    file_handler = logging.FileHandler("interface.log")
+    file_handler = logging.handlers.TimedRotatingFileHandler("interface.log",
+                                                             when="midnight")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(full_formatter)
     root.addHandler(file_handler)
