@@ -6,7 +6,7 @@ import logging
 import requests
 
 # Create Logger
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class CommandLineInterface(cmd.Cmd):
@@ -18,7 +18,7 @@ class CommandLineInterface(cmd.Cmd):
 
     def preloop(self):
         """Runs before the loop. Greets the user"""
-        logger.debug("Running the preloop-function, saying hi.")
+        LOGGER.debug("Running the preloop-function, saying hi.")
         print("\n"
               "   ____    _    __  __    _    _   _ _____ _   _    _     ""\n"
               r"  / ___|  / \  |  \/  |  / \  | \ | |_   _| | | |  / \    ""\n"
@@ -31,7 +31,7 @@ class CommandLineInterface(cmd.Cmd):
 
     def postloop(self):
         """Runs after the loop."""
-        logger.debug("Running the postloop-function, saying bye.")
+        LOGGER.debug("Running the postloop-function, saying bye.")
         print("\n"
               "   ____    _    __  __    _    _   _ _____ _   _    _     ""\n"
               r"  / ___|  / \  |  \/  |  / \  | \ | |_   _| | | |  / \    ""\n"
@@ -43,15 +43,15 @@ class CommandLineInterface(cmd.Cmd):
     def parseline(self, line):
         """Parses a line
         TODO: actually send the command to the server."""
-        logger.debug("Parsing '%s'.", line)
+        LOGGER.debug("Parsing '%s'.", line)
         ret = cmd.Cmd.parseline(self, line)
         try:
-            logger.info("Attempting to send '%s' to the server.", ret)
+            LOGGER.info("Attempting to send '%s' to the server.", ret)
             requests.post("http://{url}:{port}/command"
                           .format(**self.connection),
                           {"key": ret[0], "params": ret[1], "comm": ret[2]})
         except requests.ConnectionError:
-            logger.error("Connection lost.")
+            LOGGER.error("Connection lost.")
             print "Connection lost."
             self.connection_error()
             return ("exit", "", "exit")
@@ -65,11 +65,11 @@ class CommandLineInterface(cmd.Cmd):
         pass
 
     def precmd(self, line):
-        logger.debug("Running the precmd-function")
+        LOGGER.debug("Running the precmd-function")
         return cmd.Cmd.precmd(self, line)
 
     def postcmd(self, stop, line):
-        logger.debug("Running the postcmd-function")
+        LOGGER.debug("Running the postcmd-function")
         return cmd.Cmd.postcmd(self, stop, line)
 
     def do_EOF(self, line):
@@ -78,12 +78,12 @@ class CommandLineInterface(cmd.Cmd):
 
     def do_exit(self, line):
         """Exit the interface"""
-        logger.info("Received the command '%s'. Exiting", line)
+        LOGGER.info("Received the command '%s'. Exiting", line)
         return True
 
     def connect(self):
         """attept connecting to an instance of Samantha"""
-        logger.info("Attempting to connect to 'http://%(url)s:%(port)s'",
+        LOGGER.info("Attempting to connect to 'http://%(url)s:%(port)s'",
                     self.connection)
         print("Attempting to connect to 'http://{url}:{port}'"
               .format(**self.connection))
@@ -91,11 +91,11 @@ class CommandLineInterface(cmd.Cmd):
             requests.get("http://{url}:{port}/status"
                          .format(**self.connection))
             self.connection_attempts = 0
-            logger.info("Connection successful. "
+            LOGGER.info("Connection successful. "
                         "Connection-attempts reset to 0.")
             print "Connection available."
         except requests.ConnectionError:
-            logger.error("Could not connect!")
+            LOGGER.error("Could not connect!")
             self.connection_error()
 
     def connection_error(self):
@@ -103,28 +103,28 @@ class CommandLineInterface(cmd.Cmd):
         failed attempts to the same server."""
         self.connection_attempts += 1
         if self.connection_attempts >= 3:
-            logger.fatal("Couldn't connect 3 times in a row. Exiting.")
+            LOGGER.fatal("Couldn't connect 3 times in a row. Exiting.")
             print "The connection failed 3 times in a row. Exiting."
             self.postloop()
             exit()
-        logger.info("Connection failed. Attempt(%d/3)",
+        LOGGER.info("Connection failed. Attempt(%d/3)",
                     self.connection_attempts)
         print("The Connection to 'http://{url}:{port}/status' failed."
               .format(**self.connection))
-        logger.debug("Requiring userinput whether to try starting the server "
+        LOGGER.debug("Requiring userinput whether to try starting the server "
                      "manually.")
         var = raw_input("Try to start the server remotely? (y/n) \n>>> ")
-        logger.debug("Userinput was '%s'.", var)
+        LOGGER.debug("Userinput was '%s'.", var)
         while var not in ["y", "n"]:
             var = raw_input("Please use 'y' for yes or 'n' for no. \n>>> ")
         if var == "y":
-            logger.info("Attempting to start the Server remotely.")
+            LOGGER.info("Attempting to start the Server remotely.")
             # TODO Start the server remotely
         elif var == "n":
-            logger.debug("Requiring userinput whether to change the server's "
+            LOGGER.debug("Requiring userinput whether to change the server's "
                          "address.")
             var = raw_input("Enter a new host? (y/n) \n>>> ")
-            logger.debug("Userinput was '%s'.", var)
+            LOGGER.debug("Userinput was '%s'.", var)
             while var not in ["y", "n"]:
                 var = raw_input(
                     "Please use 'y' for yes or 'n' for no. \n>>> ")
@@ -132,9 +132,9 @@ class CommandLineInterface(cmd.Cmd):
                 self.connection_attempts = 0
                 self.connection["url"] = raw_input(
                     "Please enter the new host: ")
-                logger.info("Address changed to '%s'. Connection-attempts "
+                LOGGER.info("Address changed to '%s'. Connection-attempts "
                             "reset to 0", self.connection["url"])
-        logger.info("Attempting to reconnect.")
+        LOGGER.info("Attempting to reconnect.")
         self.connect()
 
 

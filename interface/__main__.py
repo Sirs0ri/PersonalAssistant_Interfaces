@@ -20,6 +20,9 @@ import variables_private
 # you can remove are marked - be careful and you can't do anything wrong.
 
 
+LOGGER = logging.getLogger(__name__)
+
+
 class AutoRemoteHandler(logging.Handler):
     """A Handler that sends logging messages to AutoRemote"""
 
@@ -131,10 +134,9 @@ def configure_logging():
 # print this_dir
 # print this_filename
 
-
 if __name__ == '__main__':
     configure_logging()
-    logging.debug("-"*79)
-    logging.debug("Starting simple_cli")
-    logging.debug("-"*79)
+    LOGGER.debug("-"*79)
+    LOGGER.debug("Starting simple_cli")
+    LOGGER.debug("-"*79)
     the_interface.start()
