@@ -6,18 +6,15 @@ import logging
 import time
 import simple_cli as the_interface
 
-# ==== If not interested in AR, remove the code from there (Part 1/2) =====
-import variables_private
+try:
+    import variables_private
+except ImportError:
+    variables_private = None
 # The file variables_private.py is in my .gitignore - for good reasons.
 # It includes private API-Keys that I don't want online. However, if you want
 # to be able to send AutoRemote-Messages (see: http://joaoapps.com/autoremote/
 # for certain log entries, create that file and add an entry called 'ar_key'
 # for your private AutoRemote key (eg. "ar_key = 'YOUR_KEY_HERE'").
-#
-# If you're not interested in that, you can remove the import, the whole class
-# 'AutoRemoteHandler', as well as the few lines configuring the Handler above
-# the line 'root.addHandler(autoremote_handler)' from the code below. The parts
-# you can remove are marked - be careful and you can't do anything wrong.
 
 
 LOGGER = logging.getLogger(__name__)
@@ -30,11 +27,10 @@ class AutoRemoteHandler(logging.Handler):
         import requests
         logging.getLogger("requests").setLevel(logging.WARNING)
         message = self.format(record)
-        # print "--- " + message + " ---"
-        payload = {'key': variables_private.ar_key, 'message': message}
+        payload = {'key': variables_private.ar_key,
+                   'message': "logging=:=" + message}
         requests.post("https://autoremotejoaomgcd.appspot.com/sendmessage",
                       payload)
-# === To here (End of Part 1/2) ===
 
 
 class ColorStreamHandler(logging.StreamHandler):
@@ -90,17 +86,23 @@ class ColorStreamHandler(logging.StreamHandler):
 
 
 def configure_logging():
-    """Configure Logging. Add a streamhandler and a custom AutoRemoteHandler"""
+    """Configure Logging. Add a streamhandler, a TimedRotatingFileHandler and
+    a custom AutoRemoteHandler. The latter one will be added only, if an API-
+    Key is defined inside the file 'variables_private.py'."""
 
     # create the logger
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
 
-    # create two formatter. They'll be used throughout the application.
+    # create the formatters. They'll be used throughout the application.
+    # hh:mm:ss LEVEL___ MODNAME_____ MESSAGE
     nice_formatter = logging.Formatter(
-        "%(asctime)s %(levelname)-8s %(name)-12s %(message)s")
+        "%(asctime)s %(levelname)-8s %(name)-12s %(message)s",
+        time.strftime("%X"))
+    # yyyy-mm-dd hh:mm:ss,xxx LEVEL___ MODNAME_____ MESSAGE
     full_formatter = logging.Formatter(
         "%(asctime)s %(levelname)-8s %(name)-12s %(message)s")
+    # hh:mm:ss LEVEL MODNAME MESSAGE
     practical_formatter = logging.Formatter(
         "%(asctime)s %(levelname)s %(name)s %(message)s",
         time.strftime("%X"))
@@ -119,14 +121,20 @@ def configure_logging():
     # turned off for now, since I don't want the logging in my console.
     # root.addHandler(console_handler)
 
-    # === If not interested in AR, remove the code from there (Part 2/2) ====
-    # create ans add a handler that sends errors to my phone via AutoRemote.
-    autoremote_handler = AutoRemoteHandler()
-    # Set the Handler to forward only important messages - Warnings or higher
-    autoremote_handler.setLevel(logging.WARN)
-    autoremote_handler.setFormatter(practical_formatter)
-    root.addHandler(autoremote_handler)
-    # === To here (End of Part 1/2) ===
+    # create and add a handler that sends errors to my phone via AutoRemote.
+    # if the variables_private.py file doesn't exist, or doesn't contain the
+    # key, the handler won't be added.
+    if variables_private and hasattr(variables_private, "ar_key"):
+        autoremote_handler = AutoRemoteHandler()
+        # Set Handler to forward only important messages - WARN or higher
+        autoremote_handler.setLevel(logging.WARN)
+        autoremote_handler.setFormatter(practical_formatter)
+        root.addHandler(autoremote_handler)
+    else:
+        root.warn("The AutoRemoteHandler couldn't be started. Please make "
+                  "sure the file 'variables_private.py' exists inside the "
+                  "/interface folder and that it contains the AR-key as a "
+                  "variable called 'ar_key'")
 
 # import os.path
 
