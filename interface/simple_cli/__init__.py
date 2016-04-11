@@ -141,3 +141,10 @@ class CommandLineInterface(cmd.Cmd):
 def start():
     """Starts the interface"""
     CommandLineInterface().cmdloop("Please enter your command:")
+
+if __name__ == "__main__":
+    print ("This application is not meant to be executed on its own. To start "
+           "it, please run '__main__.py' in it's parent directory, or the cli-"
+           "command 'python interface' in the directory above (that should be "
+           "'/PersonalAssistant_Interfaces').\n")
+    var = raw_input("Press the enter-key to exit.\n")
