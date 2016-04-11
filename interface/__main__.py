@@ -29,7 +29,7 @@ class AutoRemoteHandler(logging.Handler):
         logging.getLogger("requests").setLevel(logging.WARNING)
         message = self.format(record)
         payload = {'key': variables_private.ar_key,
-                   'message': "logging=:=" + message}
+                   'message': "logging=:=Interface=:=" + message}
         requests.post("https://autoremotejoaomgcd.appspot.com/sendmessage",
                       payload)
 
