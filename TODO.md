@@ -8,7 +8,7 @@
     * [ ] start a new instance if not
     * [ ] insert elements into Samantha's core's input queue
     * [ ] read and remove elements from the core's output queue
-    * [ ] Comments, Explanations for the user
+    * [x] Comments, Explanations for the user
 * [ ] create the context module
 
 ## Until 2.0 - Visual interface
