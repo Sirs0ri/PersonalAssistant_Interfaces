@@ -4,6 +4,7 @@ started start"""
 
 import logging
 import logging.handlers
+import os.path
 import time
 import simple_cli as the_interface
 
@@ -109,8 +110,10 @@ def configure_logging():
         time.strftime("%X"))
 
     # create and add a handler to store the log in a textfile.
-    file_handler = logging.handlers.TimedRotatingFileHandler("interface.log",
-                                                             when="midnight")
+    this_dir, this_filename = os.path.split(__file__)
+    file_handler = logging.handlers.TimedRotatingFileHandler(
+        this_dir + "\\logs\\interface.log",
+        when="midnight")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(full_formatter)
     root.addHandler(file_handler)
