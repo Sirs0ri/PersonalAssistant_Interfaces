@@ -1,5 +1,6 @@
 # My own stuff
 *_private.py
+interface.log.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
