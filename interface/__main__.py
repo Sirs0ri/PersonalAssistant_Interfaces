@@ -20,6 +20,7 @@ except ImportError:
 # for your private AutoRemote key (eg. "ar_key = 'YOUR_KEY_HERE'").
 
 
+logger.initialize()
 LOGGER = logging.getLogger(__name__)
 
 

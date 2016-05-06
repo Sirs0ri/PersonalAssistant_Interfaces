@@ -15,7 +15,7 @@ INITIALIZED = False
 LOGGER.debug("I was imported.")
 
 
-def init():
+def _init():
     """Configure Logging. Add a streamhandler, a TimedRotatingFileHandler and
     a custom AutoRemoteHandler. The latter one will be added only, if an API-
     Key is defined inside the file 'variables_private.py'."""
@@ -85,5 +85,6 @@ def stop():
     return True
 
 
-if not INITIALIZED:
-    INITIALIZED = init()
+def initialize():
+    if not INITIALIZED:
+        INITIALIZED = _init()
