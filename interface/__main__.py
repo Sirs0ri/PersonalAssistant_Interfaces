@@ -2,22 +2,15 @@
 from the root folder. After importing it, the interface will be
 started start"""
 
-from autobahn.twisted.websocket import WebSocketClientProtocol
 import logging
 import logging.handlers
 
+from autobahn.twisted.websocket import WebSocketClientProtocol, \
+                                       WebSocketClientFactory
+from twisted.internet import reactor
+
 import logger
 import basic_interface as interface
-
-try:
-    import variables_private
-except ImportError:
-    variables_private = None
-# The file variables_private.py is in my .gitignore - for good reasons.
-# It includes private API-Keys that I don't want online. However, if you want
-# to be able to send AutoRemote-Messages (see: http://joaoapps.com/autoremote/
-# for certain log entries, create that file and add an entry called 'ar_key'
-# for your private AutoRemote key (eg. "ar_key = 'YOUR_KEY_HERE'").
 
 
 logger.initialize()
@@ -48,11 +41,11 @@ class Interface(WebSocketClientProtocol):
         self.factory.reactor.callLater(0.01, sendInput)
 
     def onMessage(self, payload, isBinary):
+        interface.on_message(payload, isBinary)
         if isBinary:
             LOGGER.info("Binary message received: %d", len(payload))
         else:
             LOGGER.info("Text message received: %s", payload.decode('utf8'))
-        interface.on_message(payload, isBinary)
 
     def onClose(self, wasClean, code, reason):
         if reason:
@@ -68,9 +61,6 @@ if __name__ == '__main__':
     LOGGER.debug("-"*79)
     interface.start()
 
-    from twisted.internet import reactor
-
-    from autobahn.twisted.websocket import WebSocketClientFactory
     factory = WebSocketClientFactory()
     factory.protocol = Interface
 
