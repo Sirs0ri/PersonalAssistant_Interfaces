@@ -5,6 +5,8 @@ import cmd
 import logging
 import requests
 
+# TODO: Remove this module completely
+
 # Create Logger
 LOGGER = logging.getLogger(__name__)
 

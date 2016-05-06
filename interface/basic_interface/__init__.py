@@ -1,5 +1,8 @@
 import logging
 
+# TODO: handle a failed connection
+
+
 # Create Logger
 LOGGER = logging.getLogger(__name__)
 
