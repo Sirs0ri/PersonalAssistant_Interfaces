@@ -12,7 +12,7 @@ LOGGER = logging.getLogger(__name__)
 class CommandLineInterface(cmd.Cmd):
     """A simple implementation of a CLI"""
 
-    connection = {"url": "localhost", "port": 9000}
+    connection = {"url": "localhost", "port": 19113}
     connection_attempts = 0
     prompt = ">>> "
 
