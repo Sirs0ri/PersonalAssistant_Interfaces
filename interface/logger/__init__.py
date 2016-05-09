@@ -91,3 +91,5 @@ def initialize():
     global INITIALIZED
     if not INITIALIZED:
         INITIALIZED = _init()
+    else:
+        LOGGER.info("Already initialized!")
