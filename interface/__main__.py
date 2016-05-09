@@ -36,7 +36,12 @@ class Interface(WebSocketClientProtocol):
             else:
                 self.sendMessage(val.encode('utf8'))
                 interface.message_sent(val)
-                self.factory.reactor.callLater(0.01, sendInput)
+                if val == "exit_server":
+                    interface.on_exit()
+                    self.sendClose()
+                    # TODO: Close when the server closed the connection
+                else:
+                    self.factory.reactor.callLater(0.01, sendInput)
 
         self.factory.reactor.callLater(0.01, sendInput)
 
