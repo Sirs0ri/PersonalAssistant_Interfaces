@@ -81,7 +81,9 @@ def _init():
 
 
 def stop():
+    global INITIALIZED
     LOGGER.info("Exiting...")
+    INITIALIZED = False
     return True
 
 
