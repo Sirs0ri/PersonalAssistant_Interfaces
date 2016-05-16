@@ -53,6 +53,7 @@ class Interface(WebSocketClientProtocol):
             LOGGER.info("Text message received: %s", payload.decode('utf8'))
 
     def onClose(self, wasClean, code, reason):
+        LOGGER.warn("The connection has been ended.")
         if reason:
             LOGGER.info(reason)
         interface.on_close(wasClean, code, reason)
