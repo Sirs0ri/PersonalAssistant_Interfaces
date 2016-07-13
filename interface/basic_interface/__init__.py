@@ -56,6 +56,10 @@ def on_close(wasClean, code, reason):
           "                                                     bye~ ")
 
 
+def print_msg(message):
+    print message
+
+
 def get_input():
     return raw_input(">>> ").decode('utf8')
 
