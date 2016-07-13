@@ -53,7 +53,7 @@ class CommandLineInterface(cmd.Cmd):
                           .format(**self.connection),
                           {"key": ret[0], "params": ret[1], "comm": ret[2]})
         except requests.ConnectionError:
-            LOGGER.error("Connection lost.")
+            LOGGER.exception("Connection lost.")
             print "Connection lost."
             self.connection_error()
             return ("exit", "", "exit")
@@ -97,7 +97,7 @@ class CommandLineInterface(cmd.Cmd):
                         "Connection-attempts reset to 0.")
             print "Connection available."
         except requests.ConnectionError:
-            LOGGER.error("Could not connect!")
+            LOGGER.exception("Could not connect!")
             self.connection_error()
 
     def connection_error(self):
