@@ -4,6 +4,8 @@ started start"""
 
 import logging
 import logging.handlers
+import socket
+import sys
 
 from autobahn.twisted.websocket import WebSocketClientProtocol, \
                                        WebSocketClientFactory
@@ -12,9 +14,52 @@ from twisted.internet import reactor
 import logger
 import basic_interface as interface
 
+# if "--localhost" in sys.argv or "-L" in sys.argv:
+#     IP = "127.0.0.1"
+# else:
+#     IP = "192.168.178.46"
+
 
 logger.initialize()
 LOGGER = logging.getLogger(__name__)
+
+
+def wait_for_server_ip():
+
+    # Create a TCP/IP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    sock.settimeout(15)
+
+    # Bind the socket to the port
+    host = ""
+    port = 10000
+    LOGGER.info('starting up on %s port %s', host, port)
+    interface.print_msg("Waiting for a broadcast from the server.")
+    sock.bind((host, port))
+    # expects (host, port) as arg, two brackets are on purpose
+    data = None
+
+    try:
+        LOGGER.info('waiting to receive message')
+        data, address = sock.recvfrom(4096)
+
+        LOGGER.info('received %d bytes from %s', len(data), address)
+        LOGGER.info(data)
+        interface.print_msg('Received %s from %s' % (data, address))
+
+    finally:
+        sock.close()
+
+        if data and data.split(":")[0] == "sam.ip.broadcast":
+            ip, port = address[0], int(data.split(":")[1])
+            LOGGER.info("Used the broadcasted IP.")
+            interface.print_msg("Used the broadcasted IP.")
+        else:
+            ip, port = None, None
+            LOGGER.info("No broadcast received.")
+            interface.print_msg("No broadcast received.")
+        return ip, port
 
 
 class Interface(WebSocketClientProtocol):
@@ -24,6 +69,7 @@ class Interface(WebSocketClientProtocol):
         interface.on_connect(response)
 
     def onOpen(self):
+        LOGGER.info("Connection open.")
         # self.sendMessage(u"Hello, world!".encode('utf8'))
         # TODO Put some kind of authentication here
         interface.on_open()
@@ -70,5 +116,16 @@ if __name__ == '__main__':
     factory = WebSocketClientFactory()
     factory.protocol = Interface
 
-    reactor.connectTCP("127.0.0.1", 19113, factory)
-    reactor.run()
+    if "--localhost" in sys.argv or "-L" in sys.argv:
+        ip, port = "127.0.0.1", 19113
+        LOGGER.info("Used the local IP as requested per commandline-arg.")
+        interface.print_msg(
+            "Used the local IP as requested per commandline-arg.")
+    else:
+        ip, port = wait_for_server_ip()
+
+    if ip:
+        reactor.connectTCP(ip, port, factory)
+        reactor.run()
+    else:
+        interface.on_close(False, None, "No Server found.")
