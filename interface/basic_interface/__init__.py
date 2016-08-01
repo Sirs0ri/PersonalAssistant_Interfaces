@@ -1,10 +1,12 @@
 import logging
+import threading
 
 # TODO: handle a failed connection
 
 
 # Create Logger
 LOGGER = logging.getLogger(__name__)
+STOPPED = threading.Event()
 
 
 def start():
@@ -20,33 +22,37 @@ def start():
 
 
 def on_connect(response):
-    print "Connected to the Server at {}\n".format(response.peer)
-    print "Please enter your command:"
+    print "$ Connected to the Server at {}\n$".format(response.peer)
+    print "$ Please enter your command:"
     return
 
 
-def on_open():
+def on_open(comm_queue):
+    worker = threading.Thread(target=get_input, args=(comm_queue,))
+    worker.daemon = True
+    worker.start()
     return
 
 
 def message_sent(message):
-    print "Message '{}' sent successfully.".format(message)
+    print "$ Message '{}' sent successfully.".format(message)
 
 
 def on_message(payload, isBinary):
     if isBinary:
-        print "Binary message received: {}".format(len(payload))
+        print "$ Binary message received: {}".format(len(payload))
     else:
-        print "Text message received: {}".format(payload.decode('utf8'))
+        print "$ Text message received: {}".format(payload.decode('utf8'))
     return
 
 
 def on_exit():
-    print "Received the command to close the connection."
+    print "$ Received the command to close the connection."
 
 
 def on_close(wasClean, code, reason):
     LOGGER.debug("Running the postloop-function, saying bye.")
+    STOPPED.set()
     print("\n"
           "   ____    _    __  __    _    _   _ _____ _   _    _     ""\n"
           r"  / ___|  / \  |  \/  |  / \  | \ | |_   _| | | |  / \    ""\n"
@@ -57,11 +63,12 @@ def on_close(wasClean, code, reason):
 
 
 def print_msg(message):
-    print message
+    print "$ " + message
 
 
-def get_input():
-    return raw_input(">>> ").decode('utf8')
+def get_input(comm_queue):
+    while not STOPPED.is_set():
+        comm_queue.put(raw_input().decode('utf8'))
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ started start"""
 
 import logging
 import logging.handlers
+import Queue
 import socket
 import sys
 
@@ -78,22 +79,25 @@ class Interface(WebSocketClientProtocol):
         LOGGER.info("Connection open.")
         # self.sendMessage(u"Hello, world!".encode('utf8'))
         # TODO Put some kind of authentication here
-        interface.on_open()
+        interface.on_open(COMMANDS)
 
         def sendInput():
-            val = interface.get_input()
+            try:
+                val = COMMANDS.get(timeout=0.1)
+            except Queue.Empty:
+                val = None
             if val == "exit":
                 interface.on_exit()
                 self.sendClose()
-            else:
+            elif val is not None:
                 self.sendMessage(val.encode('utf8'))
                 interface.message_sent(val)
                 if val == "exit_server":
                     interface.on_exit()
                     self.sendClose()
                     # TODO: Close when the server closed the connection
-                else:
-                    self.factory.reactor.callLater(0.01, sendInput)
+            if self.state is self.STATE_OPEN:
+                self.factory.reactor.callLater(0.01, sendInput)
 
         self.factory.reactor.callLater(0.01, sendInput)
 
@@ -106,6 +110,7 @@ class Interface(WebSocketClientProtocol):
 
     def onClose(self, wasClean, code, reason):
         LOGGER.warn("The connection has been ended.")
+        # self.sendClose()
         if reason:
             LOGGER.info(reason)
         interface.on_close(wasClean, code, reason)
@@ -118,6 +123,8 @@ if __name__ == '__main__':
     LOGGER.debug("Starting Interface")
     LOGGER.debug("-"*79)
     interface.start()
+
+    COMMANDS = Queue.PriorityQueue()
 
     factory = WebSocketClientFactory()
     factory.protocol = Interface
