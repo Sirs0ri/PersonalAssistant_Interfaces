@@ -29,24 +29,30 @@ def wait_for_server_ip():
     # Create a TCP/IP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sock.settimeout(15)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.settimeout(30)
 
     # Bind the socket to the port
-    host = ""
-    port = 10000
-    LOGGER.info('starting up on %s port %s', host, port)
+    server_address = ('', 10000)
+    LOGGER.info('starting up on %s port %s',
+                server_address[0],
+                server_address[1])
     interface.print_msg("Waiting for a broadcast from the server.")
-    sock.bind((host, port))
+    sock.bind(server_address)
     # expects (host, port) as arg, two brackets are on purpose
     data = None
 
     try:
         LOGGER.info('waiting to receive message')
+        # TODO: This fails in bash if the port isn't explicitly opened
         data, address = sock.recvfrom(4096)
 
         LOGGER.info('received %d bytes from %s', len(data), address)
         LOGGER.info(data)
         interface.print_msg('Received %s from %s' % (data, address))
+
+        if data:
+            sock.sendto("I'll connect!", address)
 
     finally:
         sock.close()
@@ -59,7 +65,7 @@ def wait_for_server_ip():
             ip, port = None, None
             LOGGER.info("No broadcast received.")
             interface.print_msg("No broadcast received.")
-        return ip, port
+    return ip, port
 
 
 class Interface(WebSocketClientProtocol):
